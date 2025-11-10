@@ -1,0 +1,42 @@
+#enviar {
+    margin:1;
+}
+
+.sent {
+    opacity:50%;
+}
+
+#caixa_entrada_valores,#caixa_entrada_prompt {
+    margin:1;
+    height:9;
+}
+
+#titulo_caixa_valores,#titulo_caixa_prompt {
+    text-align: center;
+}
+
+#entrada_valores, #entrada_prompt {
+    height: 7;
+    width: 100%;
+    border: round $panel;
+}
+
+#carregando {
+    height:1;
+}
+
+#texto_saida {
+    border: round $panel;
+    background: $boost;
+}
+
+.hidden {
+    display:none;
+}
+
+.eval_result {
+    margin:1;
+    height:3;
+    border: round $panel;
+    background: $boost;
+}

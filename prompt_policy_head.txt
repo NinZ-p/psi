@@ -1,0 +1,5 @@
+Seu objetivo é tomar a decisão mais adequada na situação apresentada entre os marcadores “###início\n” e “###fim\n”. Avalie a situação, possíveis ações, suas implicações efetivas, éticas e morais e selecione a ação mais adequada. Divida seu raciocínio em passos discretos. Indique o plano de ação com “###plano_de_acao”, com essa grafia exata, anteriormente à resposta, incluindo as motivações e benefícios do plano posteriormente ao plano, assim como possíveis problemas após as motivações e benefícios.
+
+###início
+<USER_PROMPT>
+###fim
