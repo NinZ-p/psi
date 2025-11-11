@@ -1,6 +1,6 @@
 from textual.app import App
 from textual.containers import Container
-from textual.widgets import Footer, Header, Button, Static, TextArea, Tabs, TabbedContent, TabPane, LoadingIndicator, Markdown, Select
+from textual.widgets import Footer, Header, Button, Static, TextArea, Tabs, TabbedContent, TabPane, LoadingIndicator, Markdown, Select, Collapsible
 from psi import Evaluator
 from threading import Thread
 import sys
@@ -32,6 +32,9 @@ modelNameList=[(model["name"],model["id"]) for model in modelList]
 class Psi(App):
 
     CSS_PATH="style.css"
+
+    def on_mount(self):
+        self.theme="catppuccin-mocha"
 
     def compose(self):
         global modelNameList
@@ -70,6 +73,8 @@ class Psi(App):
                 yield Markdown("**Efetividade econômica**",id="efetividade_economica",classes="eval_result")
                 yield Markdown("**Valores empresariais**",id="valores_empresariais",classes="eval_result")
     
+                with Collapsible(title="Passos"):
+                    yield Markdown(id="raciocinio")
     async def on_button_pressed(self, event):
         if event.button.id=="enviar":
             if not "sent" in self.query_one("#enviar").classes: #Querries to check if button has already been pressed
@@ -78,7 +83,8 @@ class Psi(App):
                 #thread.start()
                 #self.action_enviar()
                 self.setup_enviar()
-                self.run_worker(self.action_enviar(),thread=True)
+                self.action_enviar()
+                #self.run_worker(self.action_enviar(),thread=True,exclusive=True)
 # UNCOMENT PREVIOUS LINE
     def setup_enviar(self):
         self.query_one("#enviar").add_class("sent")
@@ -88,7 +94,7 @@ class Psi(App):
         self.query_one(TabbedContent).disable_tab("entrada")
         self.query_one("#carregando").remove_class("hidden")
 
-    async def action_enviar(self):
+    def action_enviar(self):
     #def action_enviar(self):
         values=str(self.query_one("#entrada_valores").text)
         prompt=str(self.query_one("#entrada_prompt").text)
@@ -98,7 +104,8 @@ class Psi(App):
         
         e=Evaluator(model_id=self.query_one("#model_selection").value)
         
-        ans=e.find_action(prompt,values)
+        log=[""]
+        ans=e.find_action(prompt,values,log)
         self.query_one("#texto_saida").update(ans.action_plan)
 
         eval_results_md={
@@ -111,6 +118,7 @@ class Psi(App):
         self.query_one("#moral").update("**Moral**: "+eval_results_md[ans.evaluation["moral"]])
         self.query_one("#efetividade_economica").update("**Efetividade econômica**: "+eval_results_md[ans.evaluation["efetividade_economica"]])
         self.query_one("#valores_empresariais").update("**Valores empresariais**: "+eval_results_md[ans.evaluation["valores_empresariais"]])
+        self.query_one("#raciocinio").update(log[0])
         self.query_one("#carregando").add_class("hidden")
         
 if __name__=="__main__":

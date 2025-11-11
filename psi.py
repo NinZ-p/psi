@@ -27,7 +27,8 @@ class Evaluator:
     if not re.match(r"^[a-zA-Z0-9_.-]{32,}$",self.api_key):
       sys.exit("Invalid API key")
   
-  def __call_model_on_prompt(self,prompt):
+  def __call_model_on_prompt(self,prompt,log):
+    log[0]+="\n# Prompt\n\n"+prompt
     client = OpenAI(
       base_url="https://openrouter.ai/api/v1",
       api_key=self.api_key,
@@ -45,7 +46,9 @@ class Evaluator:
         }
       ]
     )
-    return(completion.choices[0].message.content)
+    res=completion.choices[0].message.content
+    log[0]+="\n# Resposta\n\n"+res
+    return(res)
 
   def __generate_policy_prompt(self,user_prompt):
     try:
@@ -73,7 +76,7 @@ class Evaluator:
           sys.exit(f"Model didn't return a valid evaluation: {answer}")
     sys.exit(f"Evaluation topic not in model's answer: {answer}")
 
-  def find_action(self,user_prompt,corporate_values):
+  def find_action(self,user_prompt,corporate_values,log):
     if self.model_id==None:
       return ()
 
@@ -81,7 +84,7 @@ class Evaluator:
 
     while True:
 
-      answer=(self.__call_model_on_prompt(self.__generate_policy_prompt(user_prompt)))
+      answer=self.__call_model_on_prompt(self.__generate_policy_prompt(user_prompt),log)
       if not "###plano_de_acao" in answer:
         sys.exit(f"Policy head didn't output a action plan: '{answer}'")
 
@@ -89,7 +92,7 @@ class Evaluator:
 
       eval_prompt=self.__generate_evaluation_prompt(user_prompt,action_plan,corporate_values)
 
-      evaluation_answer=self.__call_model_on_prompt(eval_prompt)
+      evaluation_answer=self.__call_model_on_prompt(eval_prompt,log)
 
       evaluation_dict={
         "etica":self.__find_eval("###ética",evaluation_answer),
@@ -100,6 +103,9 @@ class Evaluator:
 
       if evaluation_dict["etica"]!="<adequado>" or evaluation_dict["moral"]=="<inadequado>" or evaluation_dict["efetividade_economica"]=="<inadequado>" or evaluation_dict["valores_empresariais"]=="<inadequado>":
         continue
+
+      log[0]+="\n# Encontrou plano de ação final\n\n"
+      log[0]+="\n# Encontrou avaliação final\n\n"
 
       return Evaluator.Answer(
         action_plan=action_plan,
