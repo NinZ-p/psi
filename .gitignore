@@ -1,4 +1,6 @@
 key.txt
 __pycache__
+tester/__pycache__
+tester/tester_logs.txt
 todo
 test.py
