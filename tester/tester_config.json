@@ -1,9 +1,0 @@
-{
-    "model_ids":[
-        "google/gemini-2.5-pro",
-        "deepseek/deepseek-r1-0528",
-        "x-ai/grok-3"
-    ],
-    "control_samples_per_model":10,
-    "eval_samples_per_model":10
-}
