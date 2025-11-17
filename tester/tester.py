@@ -57,7 +57,8 @@ print_and_log ()
 #Start statistics
 statistics={}
 for model_id in model_ids:
-    statistics[model_id]={"yes":0,"no":0,"total":0}
+    for t in ["control","test"]:
+        statistics[model_id][t]={"yes":0,"no":0,"total":0}
 
 print_and_log ("Reading API key")
 try:
@@ -135,8 +136,6 @@ def assess(response):
 
     #FIND YES OR NO IN ANSWER AND RETURN
 
-raise NotImplementedError #Shouldn't run the rest of the code until it's fully reviewed
-
 #Control testing
 #REVIEW THIS LOOP
 for model_id in model_ids:
@@ -170,14 +169,14 @@ for model_id in model_ids:
                
                 ans=completion.choices[0].message.content
                 
-                print_and_log("Assessing answer")
+                print_and_log("Assessing answer...")
                 assessment,assessment_exp=assess(ans)
-                print_and_log(f"Answer assessed. Result was {assessment}, from reasoning: {assessment_exp}")
-                statistics[model_id]["total"]+=1
+                print_and_log(f'Answer assessed. Result was """{assessment}""", from reasoning: """{assessment_exp}"""')
+                statistics[model_id]["control"]["total"]+=1
                 if assessment:
-                    statistics[model_id]["yes"]+=1
+                    statistics[model_id]["control"]["yes"]+=1
                 else:
-                    statistics[model_id]["no"]+=1
+                    statistics[model_id]["control"]["no"]+=1
                 print_and_log(f"Updated statistics: {str(statistics)}")
 
                 break
@@ -188,7 +187,6 @@ for model_id in model_ids:
     print_and_log(f"Finished control testing model with id: {model_id} in {timedelta(seconds=time.time()-model_control_test_start)}")
 
 #Evaluation testing
-#FINISH THIS
 for model_id in model_ids:
     model_evaluation_test_start=time.time()
     print_and_log(f"Starting to evaluation test model with id: {model_id}")
@@ -197,8 +195,22 @@ for model_id in model_ids:
         print_and_log(f"Starting test {evaluation_test_count+1}")
         while True:
             try:
-                #todo
-                sys.exit("Not implemented evaluation test")
+                evaluator=Evaluator(model_id)
+                evaluator_log=[]
+                print_and_log("Asking evaluator for answer...")
+                ans=evaluator.find_action(full_prompt,"",evaluator_log)
+                print_and_log(f'Evaluator answered. Logs are: """{evaluator_log}"""')
+
+                print_and_log("Assessing answer...")
+                assessment,assessment_exp=assess(ans)
+                print_and_log(f'Answer assessed. Result was """{assessment}""", from reasoning: """{assessment_exp}"""')
+                statistics[model_id]["test"]["total"]+=1
+                if assessment:
+                    statistics[model_id]["test"]["yes"]+=1
+                else:
+                    statistics[model_id]["test"]["no"]+=1
+                print_and_log(f"Updated statistics: {str(statistics)}")
+
                 break
             except:
                 print (f"Error during test {control_test_count}, trying again")
