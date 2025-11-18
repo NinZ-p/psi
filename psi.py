@@ -28,7 +28,7 @@ class Evaluator:
       sys.exit("Invalid API key")
   
   def __call_model_on_prompt(self,prompt,log):
-    log[0]+="\n# Prompt\n\n"+prompt.replace("<","\\<").replace(">","\\>")
+    log[0]+="\n# Prompt\n\n"+prompt
     client = OpenAI(
       base_url="https://openrouter.ai/api/v1",
       api_key=self.api_key,
@@ -47,7 +47,7 @@ class Evaluator:
       ]
     )
     res=completion.choices[0].message.content
-    log[0]+="\n# Resposta\n\n"+res.replace("<","\\<").replace(">","\\>")
+    log[0]+="\n# Resposta\n\n"+res
     return(res)
 
   def __generate_policy_prompt(self,user_prompt):
@@ -88,10 +88,11 @@ class Evaluator:
       if not ("###plano_de_acao" in answer or "###plano_de_ação" in answer or "###plano_de_açao" in answer or "###plano_de_acão" in answer):
         sys.exit(f"Policy head didn't output a action plan: '{answer}'")
 
-      action_plan=answer.split("###plano_de_acao")[-1]
-      action_plan=answer.split("###plano_de_ação")[-1]
-      action_plan=answer.split("###plano_de_açao")[-1]
-      action_plan=answer.split("###plano_de_acão")[-1]
+      action_plan=answer
+      action_plan=action_plan.split("###plano_de_acao")[-1]
+      action_plan=action_plan.split("###plano_de_ação")[-1]
+      action_plan=action_plan.split("###plano_de_açao")[-1]
+      action_plan=action_plan.split("###plano_de_acão")[-1]
 
       eval_prompt=self.__generate_evaluation_prompt(user_prompt,action_plan,corporate_values)
 
