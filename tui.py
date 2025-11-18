@@ -65,7 +65,9 @@ class Psi(App):
             
             #Aba da saída
             with TabPane("Saída",id="saida"):
-                yield Markdown(id="texto_saida")
+                caixa_saida=Markdown(id="texto_saida")
+                caixa_saida.inline_code_theme = None
+                yield caixa_saida
                 yield LoadingIndicator(id="carregando",classes="hidden")
 
                 yield Markdown("**Ética**",id="etica",classes="eval_result")
@@ -74,7 +76,9 @@ class Psi(App):
                 yield Markdown("**Valores empresariais**",id="valores_empresariais",classes="eval_result")
     
                 with Collapsible(title="Passos"):
-                    yield Markdown(id="raciocinio")
+                    caixa_raciocinio=Markdown(id="raciocinio")
+                    caixa_raciocinio.inline_code_theme = None
+                    yield caixa_raciocinio
     async def on_button_pressed(self, event):
         if event.button.id=="enviar":
             if not "sent" in self.query_one("#enviar").classes: #Querries to check if button has already been pressed
