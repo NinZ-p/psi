@@ -14,8 +14,8 @@ Este repositório faz parte do projeto de ciclo 4 da equipe 4 do primeiro ano do
 
 # Dependências
 
-- *Textual*
-- *openai*
+- *Textual>=6.4.0*
+- *openai>=2.6.1*
 - *requests*
 
 # Utilização
