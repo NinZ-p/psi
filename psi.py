@@ -83,35 +83,37 @@ class Evaluator:
     action_plan=...
 
     while True:
+      try:
+        answer=self.__call_model_on_prompt(self.__generate_policy_prompt(user_prompt),log)
+        if not ("###plano_de_acao" in answer or "###plano_de_ação" in answer or "###plano_de_açao" in answer or "###plano_de_acão" in answer):
+          sys.exit(f"Policy head didn't output a action plan: '{answer}'")
 
-      answer=self.__call_model_on_prompt(self.__generate_policy_prompt(user_prompt),log)
-      if not ("###plano_de_acao" in answer or "###plano_de_ação" in answer or "###plano_de_açao" in answer or "###plano_de_acão" in answer):
-        sys.exit(f"Policy head didn't output a action plan: '{answer}'")
+        action_plan=answer
+        action_plan=action_plan.split("###plano_de_acao")[-1]
+        action_plan=action_plan.split("###plano_de_ação")[-1]
+        action_plan=action_plan.split("###plano_de_açao")[-1]
+        action_plan=action_plan.split("###plano_de_acão")[-1]
 
-      action_plan=answer
-      action_plan=action_plan.split("###plano_de_acao")[-1]
-      action_plan=action_plan.split("###plano_de_ação")[-1]
-      action_plan=action_plan.split("###plano_de_açao")[-1]
-      action_plan=action_plan.split("###plano_de_acão")[-1]
+        eval_prompt=self.__generate_evaluation_prompt(user_prompt,action_plan,corporate_values)
 
-      eval_prompt=self.__generate_evaluation_prompt(user_prompt,action_plan,corporate_values)
+        evaluation_answer=self.__call_model_on_prompt(eval_prompt,log)
 
-      evaluation_answer=self.__call_model_on_prompt(eval_prompt,log)
+        evaluation_dict={
+          "etica":self.__find_eval("###ética",evaluation_answer),
+          "moral":self.__find_eval("###moral",evaluation_answer),
+          "efetividade_economica":self.__find_eval("###efetividade_econômica",evaluation_answer),
+          "valores_empresariais":self.__find_eval("###valores_empresariais",evaluation_answer)
+        }
 
-      evaluation_dict={
-        "etica":self.__find_eval("###ética",evaluation_answer),
-        "moral":self.__find_eval("###moral",evaluation_answer),
-        "efetividade_economica":self.__find_eval("###efetividade_econômica",evaluation_answer),
-        "valores_empresariais":self.__find_eval("###valores_empresariais",evaluation_answer)
-      }
+        if evaluation_dict["etica"]!="<adequado>" or evaluation_dict["moral"]=="<inadequado>" or evaluation_dict["efetividade_economica"]=="<inadequado>" or evaluation_dict["valores_empresariais"]=="<inadequado>":
+          continue
 
-      if evaluation_dict["etica"]!="<adequado>" or evaluation_dict["moral"]=="<inadequado>" or evaluation_dict["efetividade_economica"]=="<inadequado>" or evaluation_dict["valores_empresariais"]=="<inadequado>":
-        continue
+        log[0]+="\n# Encontrou plano de ação final\n\n"
+        log[0]+="\n# Encontrou avaliação final\n\n"
 
-      log[0]+="\n# Encontrou plano de ação final\n\n"
-      log[0]+="\n# Encontrou avaliação final\n\n"
-
-      return Evaluator.Answer(
-        action_plan=action_plan,
-        evaluation=evaluation_dict
-      )
+        return Evaluator.Answer(
+          action_plan=action_plan,
+          evaluation=evaluation_dict
+        )
+      except:
+        pass
